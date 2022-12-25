@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:food_delevary_admin/infrastructure/data_modal.dart';
 
 import '../../core/consts.dart';
 
 class DetailMenuScreen extends StatelessWidget {
-  const DetailMenuScreen({super.key});
-
+  const DetailMenuScreen({super.key, required this.user});
+  final User user;
   @override
   Widget build(BuildContext context) {
     final mwidth = MediaQuery.of(context).size.width;
@@ -15,9 +16,11 @@ class DetailMenuScreen extends StatelessWidget {
           child: Container(
             width: mwidth,
             height: mwidth + 20,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
                 image: DecorationImage(
-                    image: AssetImage("asset/detailview/Photo Menu copy.png"),
+                    image:
+                        //  AssetImage("asset/detailview/Photo Menu copy.png"),
+                        NetworkImage(user.imageURL),
                     fit: BoxFit.cover)),
           ),
         ),
@@ -97,7 +100,7 @@ class DetailMenuScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Rainbow Sandwich",
+                              user.dishname,
                               style:
                                   TextStyle(fontFamily: fontBold, fontSize: 27),
                             ),
@@ -136,7 +139,7 @@ class DetailMenuScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 10),
                         child: Text(
-                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut in geometria, prima si dederis, danda sunt omnia. Poterat autem inpune; Itaque nostrum est-quod nostrum dico, artis est-ad ea principia, quae accepimus. Quod autem satis est, eo quicquid accessit, nimium est; Duo Reges: constructio interrete. Quod cum accidisset ut alter alterum necopinato videremus, surrexit statim. Cum salvum esse flentes sui respondissent, rogavit essentne fusi hostes. Sed residamus, inquit, si placet",
+                          user.aboutdish,
                           style: TextStyle(
                             color: Colors.grey,
                             wordSpacing: 0.8,

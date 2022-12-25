@@ -5,16 +5,22 @@ class Textfieldwidget extends StatelessWidget {
   const Textfieldwidget(
       {Key? key,
       required this.labeltext,
-      required this.prefixicon,
-      this.suffixicon})
+      this.prefixicon,
+      this.suffixicon,
+      required this.controller,
+      this.minimumlines = 1})
       : super(key: key);
   final String labeltext;
-  final Widget prefixicon;
+  final Widget? prefixicon;
   final Widget? suffixicon;
+  final TextEditingController controller;
+  final int minimumlines;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      maxLines: minimumlines,
+      controller: controller,
       decoration: InputDecoration(
           filled: true,
           fillColor: Colors.grey.shade800,
@@ -28,7 +34,7 @@ class Textfieldwidget extends StatelessWidget {
           hoverColor: kthemeGreen,
           focusColor: kthemeGreen,
           labelText: labeltext,
-          prefixIcon: prefixicon),
+          prefixIcon: prefixicon ?? SizedBox()),
     );
   }
 }

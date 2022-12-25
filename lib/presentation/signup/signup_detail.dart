@@ -6,8 +6,13 @@ import 'package:food_delevary_admin/presentation/signup/upload_photo_screen.dart
 import 'package:food_delevary_admin/presentation/signup/widgets/custom_title.dart';
 
 class SignDetailsScreen extends StatelessWidget {
-  const SignDetailsScreen({super.key});
+  SignDetailsScreen({super.key});
 
+  final TextEditingController namecontroller = TextEditingController();
+  final TextEditingController numberController = TextEditingController();
+  final TextEditingController gstController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController emaiController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     bool isSwitched = true;
@@ -23,6 +28,7 @@ class SignDetailsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Textfieldwidget(
+                  controller: namecontroller,
                   labeltext: "Restaurant name",
                   prefixicon: Icon(
                     Icons.restaurant_menu,
@@ -42,6 +48,7 @@ class SignDetailsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Textfieldwidget(
+                  controller: emaiController,
                   labeltext: "Email",
                   prefixicon: Icon(
                     Icons.email,
@@ -51,6 +58,7 @@ class SignDetailsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Textfieldwidget(
+                  controller: numberController,
                   labeltext: "Mobile Number",
                   prefixicon: Icon(
                     Icons.call,
@@ -60,6 +68,7 @@ class SignDetailsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Textfieldwidget(
+                controller: gstController,
                 labeltext: "GST (optional)",
                 prefixicon: Icon(
                   Icons.numbers_rounded,
@@ -76,17 +85,17 @@ class SignDetailsScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     kwidth5,
-                    Icon(
+                    const Icon(
                       Icons.dining,
                       color: Colors.green,
                     ),
                     kwidth10,
-                    Text(
+                    const Text(
                       "Dining",
                       style: TextStyle(
                           fontSize: 15, color: Colors.grey, letterSpacing: 0.9),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Switch(
                       value: isSwitched,
                       onChanged: (value) {

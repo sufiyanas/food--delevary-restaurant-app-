@@ -5,8 +5,9 @@ import 'package:food_delevary_admin/presentation/loginScreen/widget/text_fomfiel
 import 'package:food_delevary_admin/presentation/signup/signup_detail.dart';
 
 class LogInScreen extends StatelessWidget {
-  const LogInScreen({super.key});
-
+  LogInScreen({super.key});
+  final TextEditingController emailcontroller = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final mheight = MediaQuery.of(context).size.height;
@@ -25,6 +26,7 @@ class LogInScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Textfieldwidget(
+              controller: emailcontroller,
               labeltext: "Username",
               prefixicon: Icon(
                 Icons.person,
@@ -35,6 +37,7 @@ class LogInScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Textfieldwidget(
+              controller: passwordController,
               labeltext: "Password",
               prefixicon: Icon(
                 Icons.lock,

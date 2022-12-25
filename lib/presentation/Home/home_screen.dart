@@ -1,6 +1,10 @@
+import 'dart:ui';
+
 import 'package:badges/badges.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:food_delevary_admin/core/consts.dart';
+import 'package:food_delevary_admin/infrastructure/data_modal.dart';
 import 'package:food_delevary_admin/presentation/adddish/add_food_screen.dart';
 import 'package:food_delevary_admin/presentation/foodview/food_view_screen.dart';
 import 'package:food_delevary_admin/presentation/notificationscreen/notificationscreen.dart';
@@ -22,8 +26,9 @@ class HomeScreen extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                    color: Colors.grey.shade800,
-                    borderRadius: BorderRadius.circular(20)),
+                  color: Colors.grey.shade800,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: IconButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
@@ -47,34 +52,57 @@ class HomeScreen extends StatelessWidget {
                 )),
           ),
           khight10,
-          Expanded(
-            child: ListView.builder(
-              physics: const ScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return ListtileCard(mwidth: mwidth, amount: index);
-              },
-            ),
+          StreamBuilder<List<User>>(
+            stream: fetchFoood(CollectionName: "food"),
+            builder: (context, snapShot) {
+              final users = snapShot.data!;
+              if (snapShot.hasData) {
+                return ListView(
+                  physics: const ScrollPhysics(),
+                  shrinkWrap: true,
+                  children: users.map(buildFood).toList(),
+                );
+              } else if (snapShot.hasError) {
+                return const Text("Something went wrong!!");
+              } else {
+                return Center(
+                  child: Text("No data found"),
+                );
+              }
+            },
           )
         ],
       ),
       floatingActionButton: CircleAvatar(
         radius: 30,
         child: IconButton(
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => (AddFoodScreen()),
-                  ));
-              // _showMyDialog(context);
-            },
-            icon: const Icon(Icons.add)),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => (AddFoodScreen()),
+              ),
+            );
+            // _showMyDialog(context);
+          },
+          icon: const Icon(Icons.add),
+        ),
       ),
     );
   }
 }
+
+Widget buildFood(User user) {
+  return ListtileCard(
+    mwidth: 100,
+    userModel: user,
+  );
+}
+
+Stream<List<User>> fetchFoood({required String CollectionName}) =>
+    FirebaseFirestore.instance.collection(CollectionName).snapshots().map(
+        (snapShot) =>
+            snapShot.docs.map((doc) => User.fromJson(doc.data())).toList());
 //   Future<void> _showMyDialog(BuildContext ctx) async {
 //     return showDialog<void>(
 //       context: ctx,
@@ -111,11 +139,11 @@ class ListtileCard extends StatelessWidget {
   const ListtileCard({
     Key? key,
     required this.mwidth,
-    required this.amount,
+    required this.userModel,
   }) : super(key: key);
 
   final double mwidth;
-  final int amount;
+  final User userModel;
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +152,9 @@ class ListtileCard extends StatelessWidget {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => (const DetailMenuScreen()),
+              builder: (context) => (DetailMenuScreen(
+                user: userModel,
+              )),
             ));
       },
       child: Container(
@@ -156,12 +186,12 @@ class ListtileCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Herbal pancake",
+                    userModel.dishname,
                     style: TextStyle(fontFamily: fontBold, fontSize: 17),
                   ),
                   khight5,
                   Text(
-                    "Warung Herbal",
+                    userModel.id,
                     style: TextStyle(
                         fontFamily: fontBook, fontSize: 17, color: Colors.grey),
                   )
@@ -172,7 +202,7 @@ class ListtileCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 20),
               child: Text(
-                "\$$amount",
+                "\$${userModel.orginalPrice}",
                 style: const TextStyle(color: Colors.orange, fontSize: 25),
               ),
             )

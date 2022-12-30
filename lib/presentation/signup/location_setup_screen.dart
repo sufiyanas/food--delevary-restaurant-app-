@@ -5,8 +5,24 @@ import 'package:food_delevary_admin/presentation/Widget/material_button.dart';
 import 'package:food_delevary_admin/presentation/signup/widgets/custom_title.dart';
 
 class SetLocationScreen extends StatelessWidget {
-  const SetLocationScreen({super.key});
-
+  const SetLocationScreen(
+      {super.key,
+      required this.restaurantname,
+      required this.details,
+      required this.address,
+      required this.email,
+      required this.mobile,
+      required this.gstnumber,
+      required this.isDinnig,
+      required this.imageURL});
+  final String restaurantname;
+  final String details;
+  final String address;
+  final String email;
+  final String mobile;
+  final String gstnumber;
+  final bool isDinnig;
+  final String imageURL;
   @override
   Widget build(BuildContext context) {
     final mwidth = MediaQuery.of(context).size.width;

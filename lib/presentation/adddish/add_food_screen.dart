@@ -64,9 +64,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     // log('After Upload');
     final urlDownload = await sanpshot.ref.getDownloadURL();
     // log("Download Link : $urlDownload");
-    setState(() {
-      uploadTask = null;
-    });
+    // setState(() {
+    //   uploadTask = null;
+    // });
     return urlDownload;
   }
 
@@ -101,6 +101,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
             ),
             khight20,
             Textfieldwidget(
+                onchnaged: (p0) {},
                 controller: dishnamecontroller,
                 labeltext: "Dish Name",
                 prefixicon: Icon(Icons.restaurant_menu_outlined)),
@@ -155,7 +156,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
             Textfieldwidget(
               labeltext: "Say about dish",
               controller: aboutDishcontroller,
-              minimumlines: 3,
+              maxline: 3,
+              onchnaged: (String) {},
+              prefixicon: SizedBox(),
             ),
 
             khight10,
@@ -165,16 +168,20 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
             Textfieldwidget(
               labeltext: "Increadients(min-4)",
               controller: incredientController,
-              minimumlines: 3,
+              maxline: 3,
+              onchnaged: (String) {},
+              prefixicon: SizedBox(),
             ),
 
             khight10,
             Textfieldwidget(
+                onchnaged: (p0) {},
                 controller: orginalpriceController,
                 labeltext: "Price",
                 prefixicon: const Icon(Icons.attach_money_outlined)),
             khight10,
             Textfieldwidget(
+                onchnaged: (p0) {},
                 controller: offerPricecontroller,
                 labeltext: "Discount",
                 prefixicon: const Icon(Icons.attach_money_outlined)),
@@ -230,14 +237,14 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                   // createUser(name: "");
 
                   final user = User(
-                    imageURL: imageURL ??
-                        'https://artsmidnorthcoast.com/wp-content/uploads/2014/05/no-image-available-icon-6.png',
-                    dishname: dishnamecontroller.text,
-                    aboutdish: aboutDishcontroller.text,
-                    increadients: incredientController.text,
-                    orginalPrice: orginalpriceController.text,
-                    offerPrice: offerPricecontroller.text,
-                  );
+                      imageURL: imageURL ??
+                          'https://artsmidnorthcoast.com/wp-content/uploads/2014/05/no-image-available-icon-6.png',
+                      dishname: dishnamecontroller.text,
+                      aboutdish: aboutDishcontroller.text,
+                      increadients: incredientController.text,
+                      orginalPrice: orginalpriceController.text,
+                      offerPrice: offerPricecontroller.text,
+                      count: "1");
                   createUsermethod(user);
                   Navigator.pop(context);
                 },

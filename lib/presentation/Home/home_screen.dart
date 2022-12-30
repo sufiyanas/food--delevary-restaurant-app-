@@ -55,8 +55,11 @@ class HomeScreen extends StatelessWidget {
           StreamBuilder<List<User>>(
             stream: fetchFoood(CollectionName: "food"),
             builder: (context, snapShot) {
-              final users = snapShot.data!;
               if (snapShot.hasData) {
+                final users = snapShot.data!;
+                if (users.isEmpty) {
+                  Text("Data is Empty");
+                }
                 return ListView(
                   physics: const ScrollPhysics(),
                   shrinkWrap: true,
@@ -72,21 +75,6 @@ class HomeScreen extends StatelessWidget {
             },
           )
         ],
-      ),
-      floatingActionButton: CircleAvatar(
-        radius: 30,
-        child: IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => (AddFoodScreen()),
-              ),
-            );
-            // _showMyDialog(context);
-          },
-          icon: const Icon(Icons.add),
-        ),
       ),
     );
   }

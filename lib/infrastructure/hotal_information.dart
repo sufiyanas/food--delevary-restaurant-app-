@@ -2,18 +2,18 @@ class HotalModal {
   final String restaurantname;
   final String details;
   final String address;
-  final String email;
   final String mobile;
   final String gstnumber;
   final bool isDinnig;
   final String imageURL;
+  final String onnername;
 
   HotalModal(
       {required this.restaurantname,
+      required this.onnername,
       required this.details,
       required this.imageURL,
       required this.address,
-      required this.email,
       required this.mobile,
       required this.gstnumber,
       required this.isDinnig});
@@ -22,7 +22,7 @@ class HotalModal {
         "Restorentname": restaurantname,
         "Details": details,
         'Address': address,
-        'Email': email,
+        'OnnerName': onnername,
         'Mobile': mobile,
         'GST': gstnumber,
         'IsDinning': isDinnig,
@@ -35,7 +35,7 @@ class HotalModal {
       details: json["Details"],
       imageURL: json["imageURL"],
       address: json["Address"],
-      email: json["Email"],
+      onnername: json["OnnerName"],
       mobile: json["Mobile"],
       gstnumber: json["GST"],
       isDinnig: json["IsDinning"]);

@@ -5,7 +5,7 @@ import '../../core/consts.dart';
 
 class DetailMenuScreen extends StatelessWidget {
   const DetailMenuScreen({super.key, required this.user});
-  final User user;
+  final Food user;
   @override
   Widget build(BuildContext context) {
     final mwidth = MediaQuery.of(context).size.width;

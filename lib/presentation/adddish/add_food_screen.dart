@@ -1,7 +1,6 @@
-import 'dart:developer';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:food_delevary_admin/core/consts.dart';
@@ -13,7 +12,6 @@ import 'package:image_picker/image_picker.dart';
 
 class AddFoodScreen extends StatefulWidget {
   AddFoodScreen({super.key});
-
   @override
   State<AddFoodScreen> createState() => _AddFoodScreenState();
 }
@@ -21,32 +19,29 @@ class AddFoodScreen extends StatefulWidget {
 class _AddFoodScreenState extends State<AddFoodScreen> {
   // var items = [
   final TextEditingController dishnamecontroller = TextEditingController();
-
   final TextEditingController aboutDishcontroller = TextEditingController();
-
   final TextEditingController incredientController = TextEditingController();
-
   final TextEditingController orginalpriceController = TextEditingController();
-
   final TextEditingController offerPricecontroller = TextEditingController();
-
   String? imageURL;
   double progress = 0.0;
   String? imagepath;
   String? imagename;
   UploadTask? uploadTask;
+  //is veg
+  final userAuth = FirebaseAuth.instance.currentUser!;
+
+  bool isnonveg = false;
   selectimage() async {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image == null) {
       return;
     }
-
     setState(() {
       imagepath = image.path;
       imagename = image.name;
     });
-    // final iamgefile= File(imagepath!);
   }
 
   //upload file to fireBase
@@ -94,7 +89,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                       fit: BoxFit.cover,
                       image: (imagepath != null)
                           ? FileImage(File(imagepath!))
-                          : AssetImage("asset/home/hotalLogo.jpg")
+                          : const AssetImage("asset/home/hotalLogo.jpg")
                               as ImageProvider),
                 ),
               ),
@@ -104,30 +99,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                 onchnaged: (p0) {},
                 controller: dishnamecontroller,
                 labeltext: "Dish Name",
-                prefixicon: Icon(Icons.restaurant_menu_outlined)),
+                prefixicon: const Icon(Icons.restaurant_menu_outlined)),
             khight10,
-            Text("Food type"),
-            // Column(
-            //   children: [
-            //     Row(
-            //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-            //       children: [
-            //         Row(
-            //           children: [
-            //             Radio(value: 1, groupValue: 'null', onChanged: (index) {}),
-            //             Text('Veg')
-            //           ],
-            //         ),
-            //         Row(
-            //           children: [
-            //             Radio(value: 1, groupValue: 'null', onChanged: (index) {}),
-            //             Text('Non-veg')
-            //           ],
-            //         ),
-            //       ],
-            //     ),
-            //   ],
-            // ),
+            const Text("Food type"),
             ToggleSwitch(
               minWidth: 120.0,
               minHeight: 70,
@@ -148,6 +122,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                 [Colors.red]
               ],
               onToggle: (index) {
+                if (index == 1) {
+                  isnonveg = true;
+                }
                 print('switched to: $index');
               },
             ),
@@ -158,7 +135,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
               controller: aboutDishcontroller,
               maxline: 3,
               onchnaged: (String) {},
-              prefixicon: SizedBox(),
+              prefixicon: const SizedBox(),
             ),
 
             khight10,
@@ -170,7 +147,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
               controller: incredientController,
               maxline: 3,
               onchnaged: (String) {},
-              prefixicon: SizedBox(),
+              prefixicon: const SizedBox(),
             ),
 
             khight10,
@@ -185,58 +162,14 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                 controller: offerPricecontroller,
                 labeltext: "Discount",
                 prefixicon: const Icon(Icons.attach_money_outlined)),
-            // Column(
-            //   children: [
-            //     // const Text(
-            //     //   "Is it veg or non-veg",
-            //     //   style: TextStyle(fontSize: 18),
-            //     // ),
-            //     // const Divider(),
-            //     RadioListTile(
-            //       title: const Text("veg"),
-            //       value: "veg",
-            //       groupValue: "",
-            //       onChanged: (value) {},
-            //     ),
-            //     RadioListTile(
-            //       title: const Text("non-veg"),
-            //       value: "non-veg",
-            //       groupValue: "",
-            //       onChanged: (value) {},
-            //     )
-            //   ],
-            // ),
-
-            // Text('Item Catogary'),
-            // Row(
-            //   children: [
-            //     DropdownButton(
-            //       // Initial Value
-            //       value: dropdownvalue,
-
-            //       // Down Arrow Icon
-            //       icon: const Icon(Icons.keyboard_arrow_down),
-
-            //       // Array list of items
-            //       items: items.map((String items) {
-            //         return DropdownMenuItem(
-            //           value: items,
-            //           child: Text(items),
-            //         );
-            //       }).toList(),
-            //       // After selecting the desired option,it will
-            //       // change button value to selected value
-            //       onChanged: (String? newValue) {},
-            //     ),
-            //   ],
             khight20,
-            buildProgress(),
             CutomMaterialButton(
                 onpressed: () async {
                   imageURL = await uploadFiletoFirebase();
-                  // createUser(name: "");
 
-                  final user = User(
+                  final Food user = Food(
+                      isNonveg: isnonveg,
+                      restaurentEmail: userAuth.email!,
                       imageURL: imageURL ??
                           'https://artsmidnorthcoast.com/wp-content/uploads/2014/05/no-image-available-icon-6.png',
                       dishname: dishnamecontroller.text,
@@ -245,8 +178,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                       orginalPrice: orginalpriceController.text,
                       offerPrice: offerPricecontroller.text,
                       count: "1");
-                  createUsermethod(user);
-                  Navigator.pop(context);
+                  await addingAllfood(user);
+                  addingtoindividualhotal(
+                      user, userAuth.email!, dishnamecontroller.text);
                 },
                 text: "Add",
                 width: mwidth / 2)
@@ -256,36 +190,49 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     ));
   }
 
-  Widget buildProgress() {
-    return StreamBuilder<TaskSnapshot>(
-        stream: uploadTask?.snapshotEvents,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final data = snapshot.data!;
-            double progress = data.bytesTransferred / data.totalBytes;
-          }
-          return SizedBox(
-            height: 100,
-            child: Stack(
-              children: [
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: Colors.blue,
-                  color: Colors.red,
-                ),
-                Center(
-                  child: Text("${(100 * progress).roundToDouble()}%"),
-                )
-              ],
-            ),
-          );
-        });
-  }
+  // Widget buildProgress() {
+  //   return StreamBuilder<TaskSnapshot>(
+  //       stream: uploadTask?.snapshotEvents,
+  //       builder: (context, snapshot) {
+  //         if (snapshot.hasData) {
+  //           final data = snapshot.data!;
+  //           double progress = data.bytesTransferred / data.totalBytes;
+  //         }
+  //         return SizedBox(
+  //           height: 100,
+  //           child: Stack(
+  //             children: [
+  //               LinearProgressIndicator(
+  //                 value: progress,
+  //                 backgroundColor: Colors.blue,
+  //                 color: Colors.red,
+  //               ),
+  //               Center(
+  //                 child: Text("${(100 * progress).roundToDouble()}%"),
+  //               )
+  //             ],
+  //           ),
+  //         );
+  //       });
+  // }
 }
 
 //for creating user
-Future createUsermethod(User user) async {
+Future addingAllfood(Food user) async {
   final docUser = FirebaseFirestore.instance.collection("food").doc();
+  user.id = docUser.id;
+
+  final json = user.toJson();
+  await docUser.set(json);
+}
+
+Future addingtoindividualhotal(
+    Food user, String currentuserEmail, String Foodname) async {
+  final docUser = FirebaseFirestore.instance
+      .collection("Restaurent")
+      .doc(currentuserEmail)
+      .collection("catagory")
+      .doc(Foodname);
   user.id = docUser.id;
 
   final json = user.toJson();

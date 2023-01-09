@@ -1,11 +1,9 @@
-import 'dart:ui';
-
 import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_delevary_admin/core/consts.dart';
 import 'package:food_delevary_admin/infrastructure/data_modal.dart';
-import 'package:food_delevary_admin/presentation/adddish/add_food_screen.dart';
 import 'package:food_delevary_admin/presentation/foodview/food_view_screen.dart';
 import 'package:food_delevary_admin/presentation/notificationscreen/notificationscreen.dart';
 import 'package:food_delevary_admin/presentation/signup/widgets/custum_appbar.dart';
@@ -16,6 +14,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mwidth = MediaQuery.of(context).size.width;
+    final userAuth = FirebaseAuth.instance.currentUser!;
     return Scaffold(
       body: ListView(
         children: [
@@ -32,7 +31,7 @@ class HomeScreen extends StatelessWidget {
                 child: IconButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => (const NotificationScreen()),
+                      builder: (context) => (NotificationScreen()),
                     ));
                   },
                   icon: Badge(
@@ -52,8 +51,8 @@ class HomeScreen extends StatelessWidget {
                 )),
           ),
           khight10,
-          StreamBuilder<List<User>>(
-            stream: fetchFoood(CollectionName: "food"),
+          StreamBuilder<List<Food>>(
+            stream: fetchUserInformation(userAuth.email!),
             builder: (context, snapShot) {
               if (snapShot.hasData) {
                 final users = snapShot.data!;
@@ -66,7 +65,7 @@ class HomeScreen extends StatelessWidget {
                   children: users.map(buildFood).toList(),
                 );
               } else if (snapShot.hasError) {
-                return const Text("Something went wrong!!");
+                return Center(child: const Text("Something went wrong!!"));
               } else {
                 return Center(
                   child: Text("No data found"),
@@ -80,17 +79,28 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-Widget buildFood(User user) {
+Widget buildFood(Food user) {
   return ListtileCard(
     mwidth: 100,
     userModel: user,
   );
 }
 
-Stream<List<User>> fetchFoood({required String CollectionName}) =>
-    FirebaseFirestore.instance.collection(CollectionName).snapshots().map(
-        (snapShot) =>
-            snapShot.docs.map((doc) => User.fromJson(doc.data())).toList());
+// Stream<List<Food>> fetchFoood({required String CollectionName}) =>
+//     FirebaseFirestore.instance.collection(CollectionName).snapshots().map(
+//         (snapShot) =>
+//             snapShot.docs.map((doc) => Food.fromJson(doc.data())).toList());
+
+Stream<List<Food>> fetchUserInformation(String restorentEmail) =>
+    FirebaseFirestore.instance
+        .collection('Restaurent')
+        .doc(restorentEmail)
+        .collection('catagory')
+        .snapshots()
+        .map((snapshots) =>
+            snapshots.docs.map((doc) => Food.fromJson(doc.data())).toList());
+
+///////////////////////////////////////////////////////////////////////
 //   Future<void> _showMyDialog(BuildContext ctx) async {
 //     return showDialog<void>(
 //       context: ctx,
@@ -131,7 +141,7 @@ class ListtileCard extends StatelessWidget {
   }) : super(key: key);
 
   final double mwidth;
-  final User userModel;
+  final Food userModel;
 
   @override
   Widget build(BuildContext context) {

@@ -1,23 +1,31 @@
 import 'dart:developer';
+import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:animated_snack_bar/animated_snack_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:food_delevary_admin/core/Utils.dart';
 import 'package:food_delevary_admin/core/consts.dart';
+import 'package:food_delevary_admin/infrastructure/hotal_information.dart';
 import 'package:food_delevary_admin/presentation/Widget/big_text.dart';
 import 'package:food_delevary_admin/presentation/Widget/material_button.dart';
 import 'package:food_delevary_admin/presentation/Widget/smalltext.dart';
 import 'package:food_delevary_admin/presentation/loginScreen/widget/text_fomfield.dart';
-import 'package:food_delevary_admin/presentation/signup/upload_photo_screen.dart';
+import 'package:food_delevary_admin/presentation/mainpage/mainscreen.dart';
 import 'package:food_delevary_admin/presentation/signup/widgets/custom_title.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SignDetailsScreen extends StatefulWidget {
   SignDetailsScreen({super.key});
-
+  late DocumentReference _doucumentReferance;
+  late CollectionReference _refferancecolloction;
   @override
   State<SignDetailsScreen> createState() => _SignDetailsScreenState();
 }
@@ -29,9 +37,16 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController detailcontroller = TextEditingController();
+  final TextEditingController onnerNameController = TextEditingController();
+  TextEditingController hotalAddressController = TextEditingController();
+  final TextEditingController mobiileNumberController = TextEditingController();
+
   final formkey = GlobalKey<FormState>();
   bool isDinning = false;
   String? address;
+  UploadTask? uploadTask;
+  String? imagepath;
+  String? imagename;
   @override
   Widget build(BuildContext context) {
     bool isSwitched = true;
@@ -48,6 +63,7 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Form(
+            key: formkey,
             child: Column(
               children: [
                 const LoginpageTitle(
@@ -158,18 +174,22 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                     ),
                   ),
                 ),
-                SmallGreyText(text: "Try to add background removed image"),
+                const SmallGreyText(
+                    text: "Try to add background removed image"),
                 khight10,
-                SmallGreyText(text: "(PNG highly recommended)"),
+                const SmallGreyText(text: "(PNG highly recommended)"),
                 containerfunction(
                     mwidth: mwidth,
                     imageurl: "asset/setup/addimage.png",
                     imagetext: "",
-                    ontap: () {}),
-                Divider(
+                    ontap: () {
+                      //image picker
+                      selectImageGallary();
+                    }),
+                const Divider(
                   color: Colors.grey,
                 ),
-                BigTextWithBold(text: "LogIn Information"),
+                const BigTextWithBold(text: "LogIn Information"),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Textfieldwidget(
@@ -228,14 +248,14 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                     },
                   ),
                 ),
-                Divider(
+                const Divider(
                   color: Colors.grey,
                 ),
-                BigTextWithBold(text: "Onner Information"),
+                const BigTextWithBold(text: "Onner Information"),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Textfieldwidget(
-                    controller: restorentnamecontroller,
+                    controller: onnerNameController,
                     labeltext: "Fullname",
                     prefixicon: Icon(
                       Icons.person,
@@ -250,29 +270,10 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                     },
                   ),
                 ),
-                Divider(
+                const Divider(
                   color: Colors.grey,
                 ),
-                BigTextWithBold(text: "Restaurent Zone"),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Textfieldwidget(
-                    maxline: 4,
-                    controller: detailcontroller,
-                    labeltext: "hotal Address",
-                    prefixicon: Icon(
-                      Icons.email,
-                      color: kthemeGreen,
-                    ),
-                    onchnaged: (value) {},
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Enter any thing";
-                      }
-                      return null;
-                    },
-                  ),
-                ),
+                const BigTextWithBold(text: "Restaurent Zone"),
                 Stack(
                   children: [
                     SizedBox(
@@ -310,16 +311,20 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                               final Uint8List markIcons = await getImages(
                                   "asset/setup/location-removebg-preview.png",
                                   120);
-                              markers.clear();
+                              // markers.clear();
                               markers.add(Marker(
-                                  markerId: MarkerId("your Current location"),
+                                  markerId:
+                                      const MarkerId("your Current location"),
                                   icon: BitmapDescriptor.fromBytes(markIcons,
-                                      size: Size.fromRadius(10)),
+                                      size: const Size.fromRadius(10)),
                                   position: LatLng(
                                       position.latitude, position.longitude)));
-                              setState(() {});
+                              address = await getuserAddress(position);
+                              // setState(() {
+                              //   hotalAddressController.text = address;
+                              // });
                             },
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.location_searching_rounded,
                               size: 25,
                             )),
@@ -327,25 +332,74 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                     )
                   ],
                 ),
+                khight10,
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Textfieldwidget(
+                    maxline: 4,
+                    controller: hotalAddressController,
+                    labeltext: "hotal Address",
+                    prefixicon: Icon(
+                      Icons.email,
+                      color: kthemeGreen,
+                    ),
+                    onchnaged: (value) {},
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Enter any thing";
+                      }
+                      return null;
+                    },
+                  ),
+                ),
                 CutomMaterialButton(
-                    onpressed: () {
+                    onpressed: () async {
+                      final doucumentReferance = FirebaseFirestore.instance
+                          .collection("Restaurent")
+                          .doc(emailController.text);
+                      final refferancecolloction =
+                          doucumentReferance.collection("RestaurentDetails");
                       final isvalid = formkey.currentState!.validate();
                       if (!isvalid) {
-                        return;
+                        return log("is valid is empty");
                       }
-                      Navigator.push(
+
+                      //upload image to firebase
+                      final String imagepath =
+                          await uploadFiletoFirebase(context);
+
+                      //signup
+                      await sighnup(context);
+                      //
+
+                      final hhotalmodal = HotalModal(
+                          restaurantname: restorentnamecontroller.text,
+                          onnername: onnerNameController.text,
+                          details: detailcontroller.text,
+                          imageURL: imagepath,
+                          address: address ?? " ",
+                          mobile: mobiileNumberController.text,
+                          gstnumber: gstController.text,
+                          isDinnig: isDinning);
+                      await refferancecolloction.add(hhotalmodal.toJson());
+                      Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => (UploadPhotoScreen(
-                              address: detailcontroller.text,
-                              details: detailcontroller.text,
-                              email: emailController.text,
-                              gstnumber: gstController.text,
-                              isDinnig: isDinning,
-                              mobile: numberController.text,
-                              restaurantname: restorentnamecontroller.text,
-                            )),
+                            builder: (context) => const MainPage(),
                           ));
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (context) => (UploadPhotoScreen(
+                      //         address: detailcontroller.text,
+                      //         details: detailcontroller.text,
+                      //         email: emailController.text,
+                      //         gstnumber: gstController.text,
+                      //         isDinnig: isDinning,
+                      //         mobile: numberController.text,
+                      //         restaurantname: restorentnamecontroller.text,
+                      //       )),
+                      //     ));
                     },
                     text: "Next",
                     width: mwidth / 2),
@@ -365,7 +419,7 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
     return GestureDetector(
       onTap: ontap,
       child: Container(
-        margin: EdgeInsets.symmetric(
+        margin: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 20,
         ),
@@ -407,6 +461,7 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
     return position;
   }
 
+//get user address and convert it into string
   getuserAddress(Position position) async {
     List<Placemark> placemark =
         await placemarkFromCoordinates(position.latitude, position.longitude);
@@ -416,9 +471,10 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
     address =
         "${place.name},${place.street},PIN:${place.postalCode},${place.subLocality},${place.locality},${place.country}";
     log(place.toString());
+    return address;
   }
-  //google marker image change
 
+  //google marker image change
   Future<Uint8List> getImages(String path, int width) async {
     ByteData data = await rootBundle.load(path);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
@@ -427,5 +483,85 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
         .buffer
         .asUint8List();
+  }
+
+  //upload image to fireBase
+  uploadFiletoFirebase(BuildContext context) async {
+    final path = 'HotalPhotos/${imagename}Profile';
+    final file = File(imagepath!);
+    log(imagepath.toString());
+    final ref = FirebaseStorage.instance.ref(path);
+
+    uploadTask = ref.putFile(file);
+    showDialog(
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    log('Uploaded');
+    final sanpshot = await uploadTask!.whenComplete(() {});
+    log('After Upload');
+    final urlDownload = await sanpshot.ref.getDownloadURL();
+    log("Download Link : $urlDownload");
+
+    uploadTask = null;
+
+    return urlDownload;
+  }
+
+  //image picker
+  selectImageGallary() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? imageGallary =
+        await picker.pickImage(source: ImageSource.gallery);
+    if (imageGallary == null) {
+      return;
+    }
+
+    imagepath = imageGallary.path;
+    imagename = imageGallary.name;
+    setState(() {});
+  }
+
+//signUp on firebase functon
+
+  Future sighnup(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    try {
+      await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+              email: emailController.text.trim(),
+              password: passwordController.text.trim())
+          .then((value) {
+        final restarentDoc = FirebaseFirestore.instance
+            .collection("Restaurent")
+            .doc(emailController.text.trim());
+
+        final json = {
+          "hotalemail": emailController.text.trim(),
+        };
+        restarentDoc.set(json);
+      });
+
+      Utils.customSnackbar(
+          context: context,
+          text: "Sussesfully created an account ",
+          type: AnimatedSnackBarType.success);
+    } on FirebaseAuthException catch (e) {
+      // print(e);
+      log(e.toString());
+      log(e.message.toString());
+      Utils.customSnackbar(
+          context: context,
+          text: e.message.toString(),
+          type: AnimatedSnackBarType.error);
+      // Utils.showSnackBar(e.message);
+    }
   }
 }

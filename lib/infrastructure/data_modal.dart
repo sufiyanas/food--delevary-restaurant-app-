@@ -1,4 +1,4 @@
-class User {
+class Food {
   String id;
   final String dishname;
   final String aboutdish;
@@ -7,8 +7,12 @@ class User {
   final String offerPrice;
   final String imageURL;
   final String count;
+  final String restaurentEmail;
+  final bool isNonveg;
 
-  User({
+  Food({
+    required this.isNonveg,
+    required this.restaurentEmail,
     this.count = "1",
     required this.orginalPrice,
     required this.offerPrice,
@@ -28,10 +32,14 @@ class User {
         'OrginalPrice': orginalPrice,
         'OfferPrice': offerPrice,
         'imageURL': imageURL,
+        "restaurentEmail": restaurentEmail,
+        "IsNonveg": isNonveg,
         //'count': count
       };
 
-  static User fromJson(Map<String, dynamic> json) => User(
+  static Food fromJson(Map<String, dynamic> json) => Food(
+      isNonveg: json["IsNonveg"],
+      restaurentEmail: json["restaurentEmail"],
       count: json["Count"],
       id: json["id"],
       dishname: json["DishName"],

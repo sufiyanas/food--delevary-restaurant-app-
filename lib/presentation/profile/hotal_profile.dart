@@ -6,13 +6,20 @@ class HotalProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userAuth = FirebaseAuth.instance.currentUser!;
     return Container(
       child: Center(
-        child: ElevatedButton(
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-            },
-            child: Text("SignOut")),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(userAuth.email!),
+            ElevatedButton(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                },
+                child: Text("SignOut")),
+          ],
+        ),
       ),
     );
   }

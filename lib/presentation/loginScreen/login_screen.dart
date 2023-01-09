@@ -125,10 +125,10 @@ class LogInScreen extends StatelessWidget {
   }
 
   Future login(BuildContext context) async {
-    final isvalid = formkey.currentState!.validate();
-    if (!isvalid) {
-      return;
-    }
+    // final isvalid = formkey.currentState!.validate();
+    // if (!isvalid) {
+    //   return;
+    // }
 
     try {
       log("The email is ${emailcontroller.text} and password is ${passwordController.text}");
@@ -140,8 +140,11 @@ class LogInScreen extends StatelessWidget {
       );
 
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailcontroller.text.trim(),
-          password: passwordController.text.trim());
+        email: emailcontroller.text.trim(),
+        password: passwordController.text.trim(),
+        // email: "admin@gmail.com",
+        // password: "101010"
+      );
 
       Navigator.pushReplacement(
           context,

@@ -38,7 +38,7 @@ class SelectedPhotoViewScrreen extends StatelessWidget {
         body: SafeArea(
       child: Column(
         children: [
-          LoginpageTitle(
+          const LoginpageTitle(
               appbartitle1: "Are you Okkay",
               appbartitle2: "With this Profile?"),
           khight20,
@@ -52,9 +52,10 @@ class SelectedPhotoViewScrreen extends StatelessWidget {
                     fit: BoxFit.cover,
                     image: (imagepath != null)
                         ? FileImage(File(imagepath!))
-                        : AssetImage("asset/LogIn/Logo.png") as ImageProvider)),
+                        : const AssetImage("asset/LogIn/Logo.png")
+                            as ImageProvider)),
           ),
-          Spacer(),
+          const Spacer(),
           CutomMaterialButton(
               onpressed: () async {
                 final imageUrl = await uploadFiletoFirebase(context);
